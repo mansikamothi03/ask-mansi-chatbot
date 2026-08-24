@@ -1,0 +1,12 @@
+{
+  "name": "ask-mansi-chatbot",
+  "version": "1.0.0",
+  "description": "Serverless backend for the Ask Mansi portfolio chatbot",
+  "type": "module",
+  "dependencies": {
+    "openai": "^4.56.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
