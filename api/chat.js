@@ -1,6 +1,6 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const MANSI_SYSTEM_PROMPT = `You are "Ask Mansi" — an AI assistant representing Mansi Kamothi's professional portfolio. Your job is to help recruiters, hiring managers, and collaborators learn about Mansi's background, skills, and experience in a friendly, concise, and honest way.
 
@@ -71,8 +71,7 @@ Q: What's Mansi's experience with A/B testing?
 A: A/B testing is one of Mansi's core strengths. She runs experiments with proper statistical rigor using tools like Optimizely and Mixpanel, and has built dashboards that surface experiment results directly into leadership reviews. She focuses on helping PMs make decisions based on actual user behavior.
 
 Q: Does Mansi know SQL?
-A: Yes — SQL is one of Mansi's primary tools. She works with SQL alongside Python, Snowflake, and BigQuery for data analysis, segmentation, and reporting.
-`;
+A: Yes — SQL is one of Mansi's primary tools. She works with SQL alongside Python, Snowflake, and BigQuery for data analysis, segmentation, and reporting.`;
 
 export default async function handler(req, res) {
   // CORS headers — allow your GitHub Pages domain
@@ -94,24 +93,38 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "messages array required" });
   }
 
-  // Limit conversation history to last 10 messages to control cost
+  // Limit conversation history to last 10 messages to control quota usage
   const recentMessages = messages.slice(-10);
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: MANSI_SYSTEM_PROMPT },
-        ...recentMessages,
-      ],
-      max_tokens: 300,
-      temperature: 0.7,
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: MANSI_SYSTEM_PROMPT,
     });
 
-    const reply = completion.choices[0].message.content;
+    // Convert messages to Gemini format
+    // Gemini uses "user" and "model" roles (not "assistant")
+    const history = recentMessages.slice(0, -1).map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const lastMessage = recentMessages[recentMessages.length - 1];
+
+    const chat = model.startChat({
+      history,
+      generationConfig: {
+        maxOutputTokens: 300,
+        temperature: 0.7,
+      },
+    });
+
+    const result = await chat.sendMessage(lastMessage.content);
+    const reply = result.response.text();
+
     return res.status(200).json({ reply });
   } catch (err) {
-    console.error("OpenAI error:", err);
+    console.error("Gemini error:", err);
     return res.status(500).json({ error: "Failed to get response. Please try again." });
   }
 }

@@ -2,7 +2,7 @@
 
 A floating AI chat widget for [mansikamothi03.github.io](https://mansikamothi03.github.io) that lets recruiters and hiring managers ask questions about Mansi's background, skills, and availability.
 
-**Stack:** OpenAI GPT-4o-mini · Vercel Serverless Functions · Vanilla JS (no dependencies)
+**Stack:** Google Gemini 1.5 Flash (free tier) · Vercel Serverless Functions · Vanilla JS (no dependencies)
 
 ---
 
@@ -42,8 +42,8 @@ git push -u origin main
 2. Click **Add New → Project**
 3. Import your `ask-mansi-chatbot` repo
 4. Under **Environment Variables**, add:
-   - **Name:** `OPENAI_API_KEY`
-   - **Value:** your OpenAI API key (get one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys))
+   - **Name:** `GEMINI_API_KEY`
+   - **Value:** your free Gemini API key (get one at [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) — no credit card required)
 5. Click **Deploy**
 
 Vercel will give you a URL like `https://ask-mansi-chatbot.vercel.app`.
@@ -90,7 +90,7 @@ OpenAI GPT-4o-mini
 ## Customization
 
 ### Update the knowledge base
-Edit the `MANSI_SYSTEM_PROMPT` constant in [`api/chat.js`](api/chat.js) to add new projects, certifications, or update your availability.
+Edit the `MANSI_SYSTEM_PROMPT` constant in [`api/chat.js`](api/chat.js) to add new projects, certifications, or update your availability. The prompt is used as Gemini's system instruction.
 
 ### Change the color scheme
 The widget uses a purple-to-cyan gradient (`#6c63ff → #48c6ef`). To match your portfolio's colors, search for those hex values in [`public/chat-widget.js`](public/chat-widget.js) and replace them.
@@ -120,17 +120,16 @@ This starts a local server at `http://localhost:3000`. The `/api/chat` endpoint 
 You'll need a `.env.local` file:
 
 ```
-OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=AIza...
 ```
 
 ---
 
 ## Cost Estimate
 
-| Usage | Monthly Cost |
-|-------|-------------|
-| 100 conversations/month | ~$0.10 |
-| 500 conversations/month | ~$0.50 |
-| 1,000 conversations/month | ~$1.00 |
+| Usage | Cost |
+|-------|------|
+| Up to 1,500 requests/day | **Free** (Gemini free tier) |
+| Beyond free tier | ~$0.075 per 1M tokens (very cheap) |
 
-GPT-4o-mini is extremely affordable. Even heavy recruiter traffic will cost less than a coffee per month.
+Gemini 1.5 Flash is completely free up to 1,500 requests/day — more than enough for a portfolio chatbot. No credit card required to get started.
